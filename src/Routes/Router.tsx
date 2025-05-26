@@ -1,14 +1,14 @@
-import { createBrowserRouter } from 'react-router-dom';
-import Home from '../pages/Home';
-import ChatRoom from '../pages/ChatRoom';
+import { createBrowserRouter } from "react-router-dom";
+import Home from "../pages/Home";
+import ChatRoom from "../pages/ChatRoom";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
   },
   {
-    path: '/:id',
+    path: "/room/:id",
     element: <ChatRoom />,
   },
 ]);
