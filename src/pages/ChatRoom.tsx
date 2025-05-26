@@ -17,14 +17,19 @@ export interface Data {
 
 const ChatRoom = () => {
   const [modal, setModal] = useState(false);
-  const istoken = localStorage.getItem("token");
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
   const stompRef = useRef<ReturnType<typeof createStompClient> | null>(null);
   const roomId = useLocation().pathname.slice(6);
   const [startId, setStartId] = useState<null | string>(null);
   const [roomName, setRoomName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!istoken) {
+    if (!token) {
       setModal(true);
       return;
     }
@@ -37,7 +42,7 @@ const ChatRoom = () => {
 
     // 웹소켓 연결
     const stomp = createStompClient({
-      token: istoken,
+      token: token,
       chatRoomId: roomId,
       onMessage: (msg: ChatMessage) => {
         addMessage({
@@ -55,10 +60,14 @@ const ChatRoom = () => {
     return () => {
       stomp.deactivate();
     };
-  }, [istoken, roomId]);
+  }, [token, roomId]);
 
   const getMessages = () => {
-    getChatMessages(roomId).then((data) => setData(data.messageList));
+    getChatMessages(roomId).then((data) => {
+      setData(data.messageList);
+      setStartId(data.lastKey);
+      setIsInitialLoad(true);
+    });
   };
 
   const [data, setData] = useState<Data[]>([]);
@@ -69,12 +78,42 @@ const ChatRoom = () => {
     setData((prev) => [...prev, message]);
   };
 
+  const handleReachTop = () => {
+    if (isLoading || !startId || !mainRef.current) return;
+    setIsLoading(true);
+
+    const scrollContainer = mainRef.current;
+    const previousScrollHeight = scrollContainer.scrollHeight;
+
+    getChatMessages(roomId, startId)
+      .then((data) => {
+        if (data?.messageList?.length) {
+          setData((prev) => [...data.messageList, ...prev]);
+          setStartId(data.lastKey ?? null);
+          setIsInitialLoad(false);
+
+          requestAnimationFrame(() => {
+            const newScrollHeight = scrollContainer.scrollHeight;
+            scrollContainer.scrollTop = newScrollHeight - previousScrollHeight;
+          });
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   return (
     <div className="flex h-screen flex-col">
       {/* 헤더 */}
       <ChatHeader name={roomName} />
       {/* 채팅 구역 */}
-      <ChatBox history={data} />
+      <ChatBox
+        history={data}
+        onReachTop={handleReachTop}
+        isInitialLoad={isInitialLoad}
+        scrollRef={mainRef}
+      />
       {/* 입력창 */}
       <ChatInput
         input={input}
@@ -84,7 +123,13 @@ const ChatRoom = () => {
       />
       {modal && (
         <Modal>
-          <LoginModal onClose={() => setModal(false)} />
+          <LoginModal
+            onClose={() => setModal(false)}
+            onLoginSuccess={(newToken) => {
+              setToken(newToken);
+              setModal(false);
+            }}
+          />
         </Modal>
       )}
     </div>
