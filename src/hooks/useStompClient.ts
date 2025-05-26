@@ -47,7 +47,7 @@ export function createStompClient({
     } else {
       destinations.push(
         `/topic/chatrooms/${chatRoomId}/messages/fans`,
-        `/topic/chatrooms/${chatRoomId}/user/${userId}`
+        `/topic/chatrooms/${chatRoomId}/messages/user/${userId}`
       );
     }
 
