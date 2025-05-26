@@ -3,7 +3,8 @@ import ChatBox from "../components/ChatBox";
 import ChatHeader from "../components/ChatHeader";
 import ChatInput from "../components/ChatInput";
 import { createStompClient, type ChatMessage } from "../hooks/useStompClient";
-import toast from "react-hot-toast";
+import Modal from "../components/Modal";
+import LoginModal from "../components/LoginModal";
 
 export interface Data {
   text: string;
@@ -13,6 +14,7 @@ export interface Data {
 }
 
 const ChatRoom = () => {
+  const [modal, setModal] = useState(false);
   const exampleMessages: Data[] = [
     {
       type: "user",
@@ -38,25 +40,10 @@ const ChatRoom = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("토큰이 없습니다");
-      return;
+      setModal(true);
     }
-
-    stompRef.current = createStompClient({
-      token,
-      chatRoomId,
-      onMessage: (message: ChatMessage) => {
-        console.log("수신된 메시지:", message);
-        // 메시지 상태 처리 등...
-      },
-    });
-
-    stompRef.current.activate();
-
-    return () => {
-      stompRef.current?.deactivate();
-    };
   }, [chatRoomId]);
+
   const [data, setData] = useState<Data[]>([]);
 
   const [input, setInput] = useState("");
@@ -73,6 +60,11 @@ const ChatRoom = () => {
       <ChatBox history={exampleMessages} />
       {/* 입력창 */}
       <ChatInput input={input} setInput={setInput} setData={addMessage} />
+      {modal && (
+        <Modal>
+          <LoginModal onClose={() => setModal(false)} />
+        </Modal>
+      )}
     </div>
   );
 };

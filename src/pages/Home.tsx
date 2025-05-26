@@ -1,9 +1,10 @@
 import Header from "../components/Header";
 import banner from "../../public/Group 4.png";
 import { useState } from "react";
-import Modal from "../components/LoginModal";
+import Modal from "../components/Modal";
 import ChatMessage from "../components/ChatMessage";
 import type { Data } from "./ChatRoom";
+import CreateRoomModal from "../components/CreateRoomModal";
 
 const Home = () => {
   const [modal, setModal] = useState(false);
@@ -46,7 +47,11 @@ const Home = () => {
       >
         방 만들기
       </button>
-      {modal && <Modal onClose={() => setModal(false)} />}
+      {modal && (
+        <Modal onClose={() => setModal(false)}>
+          <CreateRoomModal onClose={() => setModal(false)} />
+        </Modal>
+      )}
     </div>
   );
 };
