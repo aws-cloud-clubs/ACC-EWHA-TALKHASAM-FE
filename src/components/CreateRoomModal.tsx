@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { postCreateRoom } from "../api/chat.api";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa6";
+import profileImage from "../../public/profile.png";
 
 interface ModalProps {
   onClose: () => void;
@@ -14,8 +15,7 @@ const CreateRoomModal = ({ onClose }: ModalProps) => {
   const [pw, setPw] = useState("");
   const [roomName, setRoomName] = useState("");
   const [profile, setProfile] = useState<File>();
-  const DEFAULT_IMAGE =
-    "https://mblogthumb-phinf.pstatic.net/MjAyMDAyMTBfODAg/MDAxNTgxMzA0MTE3ODMy.ACRLtB9v5NH-I2qjWrwiXLb7TeUiG442cJmcdzVum7cg.eTLpNg_n0rAS5sWOsofRrvBy0qZk_QcWSfUiIagTfd8g.JPEG.lattepain/1581304118739.jpg?type=w800";
+  const DEFAULT_IMAGE = profileImage;
   const [preview, setPreview] = useState(DEFAULT_IMAGE);
   const isDefault = preview === DEFAULT_IMAGE;
 
@@ -37,6 +37,12 @@ const CreateRoomModal = ({ onClose }: ModalProps) => {
         .then((data) => {
           if (data) {
             toast.success(`${roomName}방이 생성되었습니다!`);
+            localStorage.setItem(
+              "token",
+              data.chatUserLoginDataDto.accessToken
+            );
+            localStorage.setItem("isOwner", data.chatUserLoginDataDto.isOwner);
+            localStorage.setItem("nickname", name);
             nav(`/room/${data.chatRoomId}`);
           }
         });
@@ -44,6 +50,9 @@ const CreateRoomModal = ({ onClose }: ModalProps) => {
       postCreateRoom(roomName, name, pw, profile).then((data) => {
         if (data) {
           toast.success(`${roomName}방이 생성되었습니다!`);
+          localStorage.setItem("token", data.chatUserLoginDataDto.accessToken);
+          localStorage.setItem("isOwner", data.chatUserLoginDataDto.isOwner);
+          localStorage.setItem("nickname", name);
           nav(`/room/${data.chatRoomId}`);
         }
       });

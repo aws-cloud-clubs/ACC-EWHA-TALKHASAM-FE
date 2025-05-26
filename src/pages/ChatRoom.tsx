@@ -5,6 +5,8 @@ import ChatInput from "../components/ChatInput";
 import { createStompClient, type ChatMessage } from "../hooks/useStompClient";
 import Modal from "../components/Modal";
 import LoginModal from "../components/LoginModal";
+import { getChatMessages, getRoomInfo } from "../api/chat.api";
+import { useLocation } from "react-router-dom";
 
 export interface Data {
   text: string;
@@ -15,34 +17,45 @@ export interface Data {
 
 const ChatRoom = () => {
   const [modal, setModal] = useState(false);
-  const exampleMessages: Data[] = [
-    {
-      type: "user",
-      text: "안녕하세요!",
-      timestamp: "14:20",
-    },
-    {
-      type: "opponent",
-      text: "안녕하세요, 반가워요!",
-      timestamp: "14:21",
-      nickname: "@@이 여친",
-    },
-    {
-      type: "opponent",
-      text: "오늘 기분은 어때요?",
-      timestamp: "14:22",
-      nickname: "용가리",
-    },
-  ];
-  const chatRoomId = 3;
+  const istoken = localStorage.getItem("token");
   const stompRef = useRef<ReturnType<typeof createStompClient> | null>(null);
+  const roomId = useLocation().pathname.slice(6);
+  const [startId, setStartId] = useState<null | string>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!istoken) {
       setModal(true);
+      return;
     }
-  }, [chatRoomId]);
+
+    getRoomInfo(roomId).then((data) => console.log(data));
+    getMessages();
+
+    // 웹소켓 연결
+    const stomp = createStompClient({
+      token: istoken,
+      chatRoomId: roomId,
+      onMessage: (msg: ChatMessage) => {
+        addMessage({
+          text: msg.content,
+          type: msg.isOwner ? "user" : "opponent",
+          timestamp: new Date().toISOString(),
+          nickname: msg.nickname,
+        });
+      },
+    });
+
+    stomp.activate();
+    stompRef.current = stomp;
+
+    return () => {
+      stomp.deactivate();
+    };
+  }, [istoken, roomId]);
+
+  const getMessages = () => {
+    getChatMessages(roomId).then((data) => console.log(data));
+  };
 
   const [data, setData] = useState<Data[]>([]);
 
@@ -55,11 +68,16 @@ const ChatRoom = () => {
   return (
     <div className="flex h-screen flex-col">
       {/* 헤더 */}
-      <ChatHeader />
+      <ChatHeader name="" />
       {/* 채팅 구역 */}
-      <ChatBox history={exampleMessages} />
+      <ChatBox history={data} />
       {/* 입력창 */}
-      <ChatInput input={input} setInput={setInput} setData={addMessage} />
+      <ChatInput
+        input={input}
+        setInput={setInput}
+        setData={addMessage}
+        stompClient={stompRef.current}
+      />
       {modal && (
         <Modal>
           <LoginModal onClose={() => setModal(false)} />

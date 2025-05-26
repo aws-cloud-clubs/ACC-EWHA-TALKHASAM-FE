@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
-import { postCreateRoom, postLogin } from "../api/chat.api";
+import { postLogin } from "../api/chat.api";
 import { useState } from "react";
 
 interface ModalProps {
@@ -8,13 +8,17 @@ interface ModalProps {
 }
 
 const LoginModal = ({ onClose }: ModalProps) => {
-  const nav = useNavigate();
   const [name, setName] = useState("");
   const [pw, setPw] = useState("");
-  const roomId = Number(useLocation().pathname.slice(6));
+  const roomId = useLocation().pathname.slice(6);
 
   const handleGo = () => {
-    postLogin(roomId, name, pw).then((data) => console.log(data));
+    postLogin(roomId, name, pw).then((data) => {
+      localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("isOwner", data.isOwner);
+      localStorage.setItem("nickname", name);
+      onClose();
+    });
   };
 
   return (

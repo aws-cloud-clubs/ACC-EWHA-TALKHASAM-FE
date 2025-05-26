@@ -2,12 +2,16 @@ import instance from "./instance";
 
 // 로그인
 export const postLogin = async (
-  chatRoomId: number,
+  chatRoomId: string,
   nickname: string,
   password: string
 ) => {
   try {
-    const response = await instance.post("/chatusers/login");
+    const response = await instance.post("/chatusers/login", {
+      chatRoomId: chatRoomId,
+      nickname: nickname,
+      password: password,
+    });
     if (response.status == 200) {
       return response.data;
     }
@@ -37,6 +41,30 @@ export const postCreateRoom = async (
     });
 
     if (response.status === 201) {
+      return response.data;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// 방 조회
+export const getRoomInfo = async (chatRoomId: string) => {
+  try {
+    const response = await instance.get(`chatrooms/${chatRoomId}`);
+    if (response.status == 200) {
+      return response.data;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// 메세지 조회
+export const getChatMessages = async (chatRoomId: string) => {
+  try {
+    const response = await instance.get(`chatrooms/${chatRoomId}/messages`);
+    if (response.status == 200) {
       return response.data;
     }
   } catch (err) {
