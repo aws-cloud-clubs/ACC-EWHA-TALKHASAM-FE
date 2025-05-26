@@ -17,6 +17,7 @@ const LoginModal = ({ onClose, onLoginSuccess }: ModalProps) => {
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("isOwner", data.isOwner);
       localStorage.setItem("nickname", name);
+      localStorage.setItem("userId", data.chatUserId);
       onLoginSuccess(data.accessToken);
       onClose();
     });

@@ -27,6 +27,8 @@ const ChatRoom = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const mainRef = useRef<HTMLDivElement>(null);
+  const isOwner = localStorage.getItem("isOwner") == "true";
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     if (!token) {
@@ -44,6 +46,8 @@ const ChatRoom = () => {
     const stomp = createStompClient({
       token: token,
       chatRoomId: roomId,
+      isOwner: isOwner,
+      userId: userId ?? undefined,
       onMessage: (msg: ChatMessage) => {
         addMessage({
           content: msg.content,

@@ -13,12 +13,16 @@ interface StompClientParams {
   token: string;
   chatRoomId: string;
   onMessage: (payload: ChatMessage) => void;
+  isOwner: boolean;
+  userId?: string;
 }
 
 export function createStompClient({
   token,
   chatRoomId,
   onMessage,
+  userId,
+  isOwner,
 }: StompClientParams): Client {
   const stompClient = new Client({
     webSocketFactory: () =>
@@ -33,18 +37,30 @@ export function createStompClient({
   });
 
   stompClient.onConnect = () => {
-    const destination = `/topic/chatrooms/${chatRoomId}/messages`;
-    stompClient.subscribe(
-      destination,
-      (message: IMessage): StompSubscription | void => {
+    const destinations: string[] = [];
+
+    if (isOwner) {
+      destinations.push(
+        `/topic/chatrooms/${chatRoomId}/messages/artist`,
+        `/topic/chatrooms/${chatRoomId}/messages/fans`
+      );
+    } else {
+      destinations.push(
+        `/topic/chatrooms/${chatRoomId}/messages/fans`,
+        `/topic/chatrooms/${chatRoomId}/user/${userId}`
+      );
+    }
+
+    destinations.forEach((destination) => {
+      stompClient.subscribe(destination, (message: IMessage): void => {
         try {
           const payload: ChatMessage = JSON.parse(message.body);
           onMessage(payload);
         } catch (err) {
           console.error("[STOMP] 메시지 파싱 에러:", err);
         }
-      }
-    );
+      });
+    });
   };
 
   stompClient.onStompError = (frame) => {
