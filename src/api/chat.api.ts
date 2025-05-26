@@ -1,8 +1,6 @@
 import axios from "axios";
 import instance from "./instance";
 
-const token = localStorage.getItem("token");
-
 // 로그인
 export const postLogin = async (
   chatRoomId: string,
@@ -64,7 +62,11 @@ export const getRoomInfo = async (chatRoomId: string) => {
 };
 
 // 메세지 조회
-export const getChatMessages = async (chatRoomId: string, startId?: string) => {
+export const getChatMessages = async (
+  chatRoomId: string,
+  token: string,
+  startId?: string
+) => {
   try {
     const url = startId
       ? `https://artichat.r-e.kr/chatrooms/${chatRoomId}/messages?startId=${startId}`

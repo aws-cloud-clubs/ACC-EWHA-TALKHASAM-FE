@@ -33,20 +33,25 @@ const ChatRoom = () => {
   useEffect(() => {
     if (!token) {
       setModal(true);
-      return;
     }
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
+
+    console.log("여기", token);
 
     getRoomInfo(roomId).then((data) => {
       setRoomName(data.chatRoomName);
       localStorage.setItem("profile", data.profileImg);
     });
+
     getMessages();
 
-    // 웹소켓 연결
     const stomp = createStompClient({
-      token: token,
+      token,
       chatRoomId: roomId,
-      isOwner: isOwner,
+      isOwner,
       userId: userId ?? undefined,
       onMessage: (msg: ChatMessage) => {
         addMessage({
@@ -67,7 +72,7 @@ const ChatRoom = () => {
   }, [token, roomId]);
 
   const getMessages = () => {
-    getChatMessages(roomId).then((data) => {
+    getChatMessages(roomId, token!).then((data) => {
       setData(data.messageList);
       setStartId(data.lastKey);
       setIsInitialLoad(true);
