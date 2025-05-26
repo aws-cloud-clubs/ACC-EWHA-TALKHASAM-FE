@@ -9,10 +9,10 @@ import { getChatMessages, getRoomInfo } from "../api/chat.api";
 import { useLocation } from "react-router-dom";
 
 export interface Data {
-  text: string;
-  type: "user" | "opponent";
-  timestamp: string;
+  content: string;
+  createdAt: string;
   nickname?: string;
+  isOwner: boolean;
 }
 
 const ChatRoom = () => {
@@ -21,6 +21,7 @@ const ChatRoom = () => {
   const stompRef = useRef<ReturnType<typeof createStompClient> | null>(null);
   const roomId = useLocation().pathname.slice(6);
   const [startId, setStartId] = useState<null | string>(null);
+  const [roomName, setRoomName] = useState("");
 
   useEffect(() => {
     if (!istoken) {
@@ -28,7 +29,10 @@ const ChatRoom = () => {
       return;
     }
 
-    getRoomInfo(roomId).then((data) => console.log(data));
+    getRoomInfo(roomId).then((data) => {
+      setRoomName(data.chatRoomName);
+      localStorage.setItem("profile", data.profileImg);
+    });
     getMessages();
 
     // 웹소켓 연결
@@ -37,9 +41,9 @@ const ChatRoom = () => {
       chatRoomId: roomId,
       onMessage: (msg: ChatMessage) => {
         addMessage({
-          text: msg.content,
-          type: msg.isOwner ? "user" : "opponent",
-          timestamp: new Date().toISOString(),
+          content: msg.content,
+          isOwner: msg.isOwner,
+          createdAt: msg.createdAt,
           nickname: msg.nickname,
         });
       },
@@ -54,7 +58,7 @@ const ChatRoom = () => {
   }, [istoken, roomId]);
 
   const getMessages = () => {
-    getChatMessages(roomId).then((data) => console.log(data));
+    getChatMessages(roomId).then((data) => setData(data.messageList));
   };
 
   const [data, setData] = useState<Data[]>([]);
@@ -68,7 +72,7 @@ const ChatRoom = () => {
   return (
     <div className="flex h-screen flex-col">
       {/* 헤더 */}
-      <ChatHeader name="" />
+      <ChatHeader name={roomName} />
       {/* 채팅 구역 */}
       <ChatBox history={data} />
       {/* 입력창 */}

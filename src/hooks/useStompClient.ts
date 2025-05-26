@@ -6,6 +6,7 @@ export interface ChatMessage {
   nickname: string;
   isOwner: boolean;
   content: string;
+  createdAt: string;
 }
 
 interface StompClientParams {

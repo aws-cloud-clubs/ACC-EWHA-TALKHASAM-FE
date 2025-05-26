@@ -19,12 +19,6 @@ const ChatInput = ({
   const handleMessage = () => {
     if (input.trim() === "") return;
 
-    const now = new Date();
-    const time = now.toLocaleTimeString("ko-KR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
     const nickname = localStorage.getItem("nickname");
     const isOwner = localStorage.getItem("isOwner") === "true";
     const roomId = window.location.pathname.slice(6);
@@ -36,8 +30,6 @@ const ChatInput = ({
     };
 
     console.log("[📤 SEND MESSAGE]", messagePayload);
-
-    setData({ text: input, type: "user", timestamp: time });
 
     if (stompClient && stompClient.connected) {
       stompClient.publish({

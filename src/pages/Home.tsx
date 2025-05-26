@@ -8,28 +8,8 @@ import CreateRoomModal from "../components/CreateRoomModal";
 
 const Home = () => {
   const [modal, setModal] = useState(false);
-  const exampleMessages: Data[] = [
-    {
-      type: "user",
-      text: "점심 먹었어?",
-      timestamp: "14:20",
-    },
-    {
-      type: "opponent",
-      text: "웅 @@이는?",
-      timestamp: "14:21",
-    },
-    {
-      type: "opponent",
-      text: "난 못먹었지ㅜㅜ 너는?",
-      timestamp: "14:22",
-    },
-    {
-      type: "opponent",
-      text: "난 못먹었지ㅜㅜ 너는?",
-      timestamp: "14:22",
-    },
-  ];
+  const nickname = localStorage.getItem("nickname") || "@@";
+  const exampleMessages: Data[] = [];
 
   return (
     <div className="flex h-screen flex-col items-center gap-3 pt-[62px] w-full">
