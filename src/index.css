@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 html,
 body {
@@ -11,7 +11,7 @@ body {
 
 #root {
   background-color: white;
-  max-width: 500px;
+  max-width: 400px;
   width: 100%;
   margin: 0 auto;
   min-height: calc(var(--vh, 1vh) * 100);

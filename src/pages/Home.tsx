@@ -10,10 +10,9 @@ import InfoModal from "../components/InfoModal";
 const Home = () => {
   const [modal, setModal] = useState(false);
   const nickname = localStorage.getItem("nickname") || "@@";
-  const [infoModal, setInfoModal] = useState(false);
 
   return (
-    <div className="flex h-screen flex-col items-center gap-7 pt-[62px] w-full">
+    <div className="flex h-screen flex-col items-center gap-7 pt-[62px] w-full overflow-y-auto pb-[80px] ">
       <Header />
       <img src={banner} />
       <InfoModal />
