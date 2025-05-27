@@ -1,5 +1,6 @@
 import axios from "axios";
 import instance from "./instance";
+import toast from "react-hot-toast";
 
 // 로그인
 export const postLogin = async (
@@ -16,8 +17,8 @@ export const postLogin = async (
     if (response.status == 200) {
       return response.data;
     }
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    return { error: err.response?.status || 500 };
   }
 };
 

@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { postLogin } from "../api/chat.api";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface ModalProps {
   onClose: () => void;
@@ -14,6 +15,12 @@ const LoginModal = ({ onClose, onLoginSuccess }: ModalProps) => {
 
   const handleGo = () => {
     postLogin(roomId, name, pw).then((data) => {
+      if (data.error === 400) {
+        toast.error(
+          "다른 사람이 사용하는 닉네임이거나 비밀번호가 올바르지 않습니다!"
+        );
+        return;
+      }
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("isOwner", data.isOwner);
       localStorage.setItem("nickname", name);
